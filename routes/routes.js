@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router()
 const {  userAuth, CreateUser, LoginUser, checkRole } = require('../controllers/usercontroller');
-const {Uploads, Download, FileAttribute} = require('../controllers/uploadcontroller');
-//var passport  = require('passport');
-//require('./passport')(passport)
+const {Uploads, Download, FileAttribute, Delete, } = require('../controllers/uploadcontroller');
+// var passport = require('passport')
+// require('./passport')(passport)
 router
 .post('/auth/register-user', async (req, res) => {
     await CreateUser("user", req, res)
@@ -39,6 +39,10 @@ router
 async(req, res) => {
     await Download(req.user, req, res) 
 });
+
+ router.delete('/delete-unsafe-files', async(req, res) => { 
+    await Delete(req.user, req, res)
+ })
 
 // router
 // .route('/listfiles')

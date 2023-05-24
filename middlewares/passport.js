@@ -1,7 +1,6 @@
-
-const User = require('../model/Usermodel')
-require('dotenv').config()
-const { Strategy, ExtractJwt } = require('passport-jwt')
+const User = require('../model/Usermodel');
+require('dotenv').config();
+const { Strategy, ExtractJwt } = require('passport-jwt');
 
 const options = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -17,12 +16,12 @@ module.exports = (passport) => {
             }
         }).then(user => {
             if(user){
-                return done(null, user)
+                return done(null, user);
             }
-                return done(null, false)
+                return done(null, false);
         })
         .catch(err => {
-            return done(null, false)
+            return done(null, false); 
         });
     })
     
