@@ -7,12 +7,17 @@ const router = require('./routes/routes')
 const bodyParser = require('body-parser');
 require('dotenv').config()
 const fileUpload = require('express-fileupload');
+const compression = require('compression');
+
 
 app.use(fileUpload());
+app.use(compression({
+  threshold: '5kb', 
+  level: 6,
+}));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json())
-
 app.use('/', router);
 
 
@@ -21,8 +26,6 @@ db.authenticate()
   .catch(err => console.log('Error: ' + err ));
 
 db.sync();
-
-
 
 const port = process.env.PORT;
 const Host = '0.0.0.0';

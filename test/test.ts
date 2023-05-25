@@ -1,6 +1,5 @@
 const User = require('../model/Usermodel');
-const File = require('../model/Filemodel')
-const { app, redisClient } = require('../app')
+const { app } = require('../app')
 const request= require('supertest');
 
 describe('Admin', () => {
@@ -35,7 +34,6 @@ describe('user', () => {
             .post('/auth/register-user')
             .send({
             fullname: "user test",
-            username: "user-test",
             email: "user-test@gmail.com",
             password: "testingUser12345",
             })
@@ -43,7 +41,6 @@ describe('user', () => {
             .expect((res) => {
                 //res.body.data.length = 8;
                 res.body.fullname = "user test";
-                res.body.username = "user-test";
                 res.body.email = "user-test@gmail.com";
                 res.body.role = "user";
             })
@@ -65,9 +62,8 @@ describe('user', () => {
             .expect((res) => {
                 //res.body.data.length = 7;
                 res.body.fullname = "user test";
-                res.body.username = "user-test";
                 res.body.role = "user";
-                res.body.status = "successfully logged in";
+                res.body.status = "Logged in successfully";
                 res.body.success = true;
             })
             .end((err, res) => {

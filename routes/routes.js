@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router()
 const {  CreateUser, LoginUser } = require('../controllers/usercontroller');
-const {Uploads, Download, Unsafe, Delete } = require('../controllers/uploadcontroller');
+const {Uploads, Download, Unsafe, Delete, History } = require('../controllers/uploadcontroller');
 const multer = require('multer');
 const upload = multer({dest:'uploads/'})
-const jwt = require("jsonwebtoken");
 const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require('../middlewares/authentication')
 
 router
@@ -42,12 +41,11 @@ router
  Unsafe);
 
  router
-    .delete('/delete-unsafe-files', Delete)
- 
- 
+    .delete('/delete-unsafe-files', Delete);
 
-// router
-// .route('/filestatus')
-// .delete(userAuth, checkRole(["admin"]), FileAttribute);
+router
+        .get('/file-history', verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin, 
+        History)
+  
 
 module.exports = router;

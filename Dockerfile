@@ -1,5 +1,5 @@
 FROM node:alpine
-WORKDIR /risevest-technical-assessment
+WORKDIR /risevest-test-solution
 
 
 COPY package*.json ./
