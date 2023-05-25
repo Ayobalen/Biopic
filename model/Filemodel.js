@@ -1,13 +1,14 @@
 const Sequelize = require('sequelize');
-const db = require("../configs/config");
-const { v4: uuidv4 } = require('uuid');
-//const { Sequelize } = require('sequelize');
+const db = require('../configs/config');
+const { nanoid } = require('nanoid');
 
- const File = db.define('File', {
+  const File = db.define('File', {
     id: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+        type: Sequelize.STRING(10),
+        autoincrement: false,
+        allowNull: false,
+        primaryKey: true,
+        defaultValue: () => nanoid(10)
     },
     filename: {
       type: Sequelize.STRING,
@@ -15,7 +16,11 @@ const { v4: uuidv4 } = require('uuid');
     publicId: {
       type: Sequelize.STRING,
     },
-  });
+    is_safe: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true,
+    },
+  })
 
 
- module.exports = File;
+module.exports = File;

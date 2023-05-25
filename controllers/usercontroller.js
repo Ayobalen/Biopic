@@ -1,11 +1,7 @@
-
 const bcrypt = require('bcryptjs');
 const User = require('../model/Usermodel');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const passport = require('passport');
-
-
 
 exports.CreateUser = async (role, req, res) => {
     
@@ -65,21 +61,13 @@ exports.LoginUser = async (role, req, res) => {
           }
           const validate = await bcrypt.compare(password, user.password);
           if(validate){
-              let token = jwt.sign(
-                  { 
-                  fullname: user.fullname,
-                  email: user.email, 
-                  username: user.username, 
-                  role: user.role, 
-                  id: user.id}, 
-                  process.env.TOKEN, { expiresIn: "24h"});
+            const accessToken = jwt.sign(user.toJSON(), process.env.TOKEN,  {expiresIn:"3d"});
   
               let result = {
                   fullname: user.fullname,
                   username: user.username,
                   role: user.role,
-                  token: `Bearer ${token}`,
-                  expiresIn: 24
+                  token: accessToken
               };
 
 
@@ -107,15 +95,3 @@ exports.LoginUser = async (role, req, res) => {
         });
   }
 };
-
-
-
-exports.userAuth = passport.authenticate('jwt', {session: true});
-
-exports.checkRole = roles => (req, res, next) => {
-if(!roles.includes(req.user.role)){ 
-    res.status(401).json("Unauthorized") 
-    }
-    next();
-};
-

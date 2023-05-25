@@ -24,67 +24,80 @@ const upload = multer({
   });
 
  // Upload file to Cloudinary
- exports.Uploads = async(req, res)=> {
-    try{
-   // Generate a unique filename for the uploaded file
-   const filename = `${uuidv4()}_${req.file.originalname}`;
-   // Upload file to Cloudinary
-   const result = await cloudinary.uploader.upload(req.file.path, {
-     folder: file_path, // Specify the folder name to store the file
-     public_id: "uploads", // Set the public_id to the generated filename
-   });
-   // Create a record in the database to store file details
-   const file = await File.create({
-     filename: result.original_filename,
-     publicId: result.public_id,
-   });
-
-   // Remove the temporary file from the server
-   fs.unlinkSync(req.file.path);
-   console.log("uploaded file")
-   console.log('File uploaded successfully', file );
-}catch{
- if(error){
-   console.log(error);
- }
-}}
-// Express.js route for file download
-exports.Download = async ( req, res) => {
-    try{
-    const fileId = req.params.fileId;
-    console.log("uploaded file")
-    // Retrieve file details from the database
-    const file = await File.findByPk(fileId);
-
-    if (!file) {
-      return console.log({ error: 'File not found' });
-    }
-
-    // Generate a download URL for the specified file
-    const downloadUrl = cloudinary.url(file.publicId);
-
-    // Redirect to the download URL
-    res.redirect(downloadUrl);
-  } catch (error) {
-    console.error(error);
-    return console.log({ error: 'Failed to download file' });
-  }
-  };
-   // Route to delete unsafe files
-   exports.Delete = async(req, res)=> {
-  try{
-  const publicId  = req.params;
-    // Delete the file from Cloudinary
-    const result = await cloudinary.uploader.destroy(publicId);
-
-    // Check if deletion was successful
-    if (result.result === 'ok') {
-    console.log ('File deleted successfully');
-    } else {
-      console.log ('Failed to delete file');
-    }
-  } catch (error) {
-   console.log('An error occurred while deleting the file');
+ exports.Uploads = async (req, res) => {
+  try {
+    const { image } = req.body;
+    const filename = `${uuidv4()}`;
+    
+    // Upload file to Cloudinary
+    const result = await cloudinary.uploader.upload(image, {
+      folder: 'uploads', // Specify the folder name to store the file
+      public_id: filename, // Set the public_id to the generated filename
+    });
+   //  Create a record in the database to store file details
+     const file = await File.create({
+      filename: result.original_filename,
+      publicId: result.public_id
+    });
+     return res.status(200).json({status :'success', message: "Uploaded successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: 'error', message: 'Failed to upload file' });
   }
 };
+
+// Express.js route for file download
+exports.Download = async (req, res) => {
+  try {
+    const { publicId } = req.body;
+
+    const downloadUrl = cloudinary.url(publicId, {
+      secure: true,
+      attachment: true,
+    });
+
+    res.status(200).json({ downloadUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to download file' });
+  }
+};
+
+exports.Unsafe = async (req, res) => {
+  try{
+    // const { publicId } = req.params;
+     const file = await File.findOne(req.params.publicId);
+    if(!file){
+      return res.status(404).json({ status: 'error', message: 'File does not exist' });
+    }
+    file.is_safe === false;
+    file.save();
+    return res.status(200).json({ status: 'success', message: 'File marked as unsafe successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: 'error', message: 'Failed' });
+  }
+}
+
+exports.Delete = async (req, res) => {
+  try{
+     // Get the list of unsafe files from Cloudinary
+     const result = await cloudinary.api.resources({ is_safe: 'false' });
+
+     // Iterate over the list and delete each file
+     const deletePromises = result.resources.map((resource) => {
+       return cloudinary.uploader.destroy(resource.publicId);
+     });
  
+     // Wait for all files to be deleted
+     await Promise.all(deletePromises);
+ 
+     res.status(200).json({ message: 'Unsafe files deleted successfully' });
+   } catch (error) {
+     console.log(error);
+     return res.status(500).json({ status: 'error', message: 'Failed' });
+   }
+ };
+  
+
+
